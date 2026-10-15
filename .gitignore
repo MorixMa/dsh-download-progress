@@ -1,0 +1,21 @@
+# 依赖树（本插件自己不带任何依赖，这里防的是将来手滑）
+node_modules/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志与临时产物
+*.log
+npm-debug.log*
+pnpm-debug.log*
+*.tgz
+*.tmp
+
+# 注意：lib/ 是**故意提交**的预构建产物。
+# 本插件的安装方式是 `dsh plugin add github:MorixMa/dsh-task-progress` 或 `link:`，
+# 两种情况都不会在安装端跑构建 —— 产物必须随仓库走。不要把它加进忽略列表。

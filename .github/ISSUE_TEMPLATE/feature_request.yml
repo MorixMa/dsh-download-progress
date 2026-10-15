@@ -1,0 +1,45 @@
+name: 功能请求
+description: 新的进度源格式、新的界面能力、新的交互
+title: '[Feature] '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        这个插件的定位是**只读的进度观察者**：它不启动任务、不杀任务、不写文件。
+        如果请求需要它主动做这些事，先说明为什么那件事必须是它来做。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 描述场景，而不是先给方案
+      placeholder: 我用 aria2 下载，它的进度行是 `[#1a2b3c 12MiB/100MiB(12%) CN:1 DL:1.2MiB]`，面板读不出体积。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你希望的方案（可选）
+    validations:
+      required: false
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: 真实样本
+      description: |
+        如果和「解析某种新格式」有关，请贴**原样的输出**（不要改写、不要手打数字）。
+        解析器的每一条规则都是在真实样本上写出来并被断言钉住的。
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 范围确认
+      options:
+        - label: 这个请求不需要插件启动、停止或修改任何任务与文件
+          required: true

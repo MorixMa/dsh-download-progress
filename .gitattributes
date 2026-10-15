@@ -1,0 +1,12 @@
+# 统一换行：仓库里一律 LF（构建产物也在其中）。
+* text=auto eol=lf
+
+# 生成物标记：GitHub 在 diff 里会折叠它们，语言统计也不算进去。
+# 它们由 `node tools/build.mjs` 从 src/ 拼出来，源码才是唯一事实源。
+lib/index.js       linguist-generated=true
+lib/client.js      linguist-generated=true
+lib/*.js           linguist-generated=true
+
+# 这些是二进制/易冲突的文件
+*.png binary
+*.ico binary

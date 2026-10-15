@@ -1,0 +1,77 @@
+{
+  "$schema": "https://raw.githubusercontent.com/T-Auto/dsh-std/8a15541117cb3c13ddb8f2468308691b6051d162/packages/manifest/schema/dsh-plugin-0.15.schema.json",
+  "manifestVersion": "0.15",
+  "id": "morixma.dsh-task-progress",
+  "name": "dsh-task-progress",
+  "version": "1.0.0",
+  "license": "MIT",
+  "facets": {
+    "host": {
+      "entry": "lib/index.js",
+      "apiVersion": "v1alpha1"
+    }
+  },
+  "compat": {
+    "hosts": [
+      "@deepseek-ai/dsh@>=0.2.0-rc.1 <0.2.1"
+    ]
+  },
+  "source": {
+    "repository": "https://github.com/MorixMa/dsh-task-progress"
+  },
+  "permissions": [
+    {
+      "name": "dsh-task-progress.web.route",
+      "scope": "webserver",
+      "reason": "在宿主 webServer 上注册两条路由：GET /task-progress（只读状态）与 POST /task-progress/open（用系统默认应用打开产物 / 在文件管理器里定位它）。两条都过浏览器信任围栏；open 额外要求路径命中一份只由本插件写入的短时白名单。"
+    },
+    {
+      "name": "dsh-task-progress.fs.read",
+      "scope": "filesystem-read",
+      "reason": "只读：读取配置里 progressSources 指定的进度文件尾部（最多 256 KB），以及对任务产物做 stat 以决定「打开 / 定位」按钮是否可用。不写、不建、不删。"
+    },
+    {
+      "name": "dsh-task-progress.jobs.read",
+      "scope": "jobs-read",
+      "reason": "通过宿主 ctx.jobs 注册表的非消耗接口 list() / readAt() 读取后台任务名册与输出尾部；不移动模型自己的 job_output 游标，也不触发任何完成通知。"
+    },
+    {
+      "name": "dsh-task-progress.desktop.open",
+      "scope": "desktop-open",
+      "reason": "把白名单内的产物路径交给宿主服务 ctx.sessionController 的 openPath / revealPath，由 DSH 自己调用系统默认应用或文件管理器。插件不 spawn 进程、不拼命令行。"
+    }
+  ],
+  "contributes": {
+    "x-ui-slots": [
+      {
+        "slot": "conversation.session.header.utilities",
+        "id": "dsh-task-progress:indicator",
+        "order": 5,
+        "title": "任务进度",
+        "description": "会话头右侧的下载指示器：环形进度 + 数量角标，点开是任务进度弹层。"
+      }
+    ],
+    "x-display": [
+      {
+        "title": "dsh-task-progress",
+        "description": "DSH 任务进度指示器：会话头里的常驻图标，自动发现运行中的后台 / 下载任务，环形进度 + 动画进度条 + 速率 + 剩余时间。不依赖任何其它插件。",
+        "descriptionEn": "A download-style task progress indicator for DSH: a persistent icon in the session header that finds running background/download jobs and renders a ring, animated progress bars, speed and ETA. No third-party plugin required."
+      }
+    ],
+    "x-routes": [
+      {
+        "method": "GET",
+        "path": "/task-progress",
+        "readOnly": true,
+        "fence": "browser-trust (loopback Host or deployment trustedHosts, cross-site refused, Origin must match Host or be the desktop shell origin)"
+      },
+      {
+        "method": "POST",
+        "path": "/task-progress/open",
+        "readOnly": false,
+        "fence": "browser-trust + short-lived allowlist of artifact paths this plugin itself just reported (10 min TTL, 128 entries)"
+      }
+    ]
+  },
+  "subscriptions": []
+}

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: ${{ matrix.os }} · node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # 这个仓库没有依赖：不需要 npm install / pnpm install。
+      - name: 构建产物
+        run: node tools/build.mjs
+
+      # lib/ 是提交进仓库的预构建产物（安装端不会跑构建），所以产物必须与源码同步。
+      - name: 产物与源码同步（改了 src 忘了 build 会在这里失败）
+        run: git diff --exit-code -- lib
+
+      - name: host 逻辑单测
+        run: node tests/test-parsers.mjs
+
+      - name: client 冒烟
+        run: node tests/test-client.mjs
+
+      # 完整门禁。CI 上没有 DSH profile，profile 登记那几项会自动跳过；
+      # 本地跑同一个脚本时会真的检查 profile。
+      - name: 完整门禁
+        run: node tests/verify-install.mjs
+
+      # GitHub 社区标准里最基本的一条：许可文件必须在。
+      - name: 必须的社区文件
+        shell: bash
+        run: |
+          for f in LICENSE README.md README.en.md CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md CHANGELOG.md; do
+            test -s "$f" || { echo "缺少或为空: $f"; exit 1; }
+          done
+          echo "社区文件齐全"

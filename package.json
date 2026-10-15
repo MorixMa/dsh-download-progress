@@ -1,0 +1,78 @@
+{
+  "name": "dsh-task-progress",
+  "version": "1.0.0",
+  "description": "DSH 任务进度指示器：会话头里的常驻图标，自动发现运行中的后台 / 下载任务，环形进度 + 动画进度条 + 速率 + 剩余时间。不依赖任何其它插件。",
+  "license": "MIT",
+  "author": "MorixMa",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./dsh-plugin.json": "./dsh-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.2.0-rc.1 <0.2.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh": {
+      "optional": true
+    }
+  },
+  "files": [
+    "lib",
+    "src",
+    "tools",
+    "tests",
+    "cordis.patch.yml",
+    "dsh-plugin.json",
+    "README.md",
+    "README.en.md",
+    "INSTALL.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "SECURITY.md",
+    "LICENSE",
+    "examples"
+  ],
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node tests/test-parsers.mjs && node tests/test-client.mjs",
+    "verify": "node tests/verify-install.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "download",
+    "progress",
+    "progress-bar",
+    "background-jobs",
+    "sidebar",
+    "session-header"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MorixMa/dsh-task-progress.git"
+  },
+  "homepage": "https://github.com/MorixMa/dsh-task-progress#readme",
+  "bugs": {
+    "url": "https://github.com/MorixMa/dsh-task-progress/issues"
+  },
+  "engines": {
+    "node": ">=22.3"
+  }
+}
