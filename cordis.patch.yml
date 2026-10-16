@@ -1,5 +1,5 @@
 # ============================================================================
-# dsh-task-progress —— DSH bundle patch（插件自带的挂载声明）
+# dsh-download-progress —— DSH bundle patch（插件自带的挂载声明）
 # ============================================================================
 # 这是本插件的"挂载声明"。DSH 启动时按 bundle 层栈叠加各插件 patch，本文件把
 # 「任务进度」插件插入 profile 的配置树。
@@ -7,17 +7,17 @@
 # 安装（本地开发，link: 绝对路径）：
 #   dsh plugin --profile desktop add link:<仓库绝对路径>
 #
-# 该命令会同时登记 dependencies、把 dsh-task-progress 追加进 dsh.profile.bundles，
+# 该命令会同时登记 dependencies、把 dsh-download-progress 追加进 dsh.profile.bundles，
 # 并在启动时合并本 patch。装完需要重启 DSH。
 #
 # 卸载：
-#   dsh plugin --profile desktop remove dsh-task-progress
+#   dsh plugin --profile desktop remove dsh-download-progress
 # ============================================================================
 
 - insert:
-    - id: task-progress
-      name: dsh-task-progress
-      # 配置项（也可在 DSH 设置里按本行 entry id `task-progress` 改）：
+    - id: download-progress
+      name: dsh-download-progress
+      # 配置项（也可在 DSH 设置里按本行 entry id `download-progress` 改）：
       #
       # progressSources —— 进度源路径数组（绝对路径）。目录会被浅扫描一次，
       #   取 *.md / *.markdown / *.txt / *.json / *.jsonl；文件按扩展名解析。

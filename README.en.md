@@ -1,35 +1,52 @@
-# dsh-task-progress
+# dsh-download-progress
 
-**A task-progress indicator for DSH (DeepSeek Harness)** — a persistent download-style icon
-in the session header that discovers running background jobs and downloads on its own, and
-renders them as a progress ring, animated bars, transfer speed and ETA.
+**A download-progress indicator built for DSH's download tasks** — a persistent download-style
+icon in the session header that finds your running downloads on its own, and renders them as a
+progress ring, animated bars, transfer speed and ETA.
 
-> **中文**：DSH 任务进度指示器 —— 会话头里一个常驻的下载图标，自动发现正在跑的后台任务与
-> 下载任务，用环形进度、动画进度条、速率和预计剩余时间实时呈现。
+> **中文**：专为 DSH 的下载任务做的进度指示器 —— 会话头里一个常驻的下载图标，自动发现正在跑的
+> 下载任务与后台任务，用环形进度、动画进度条、速率和预计剩余时间实时呈现。
 > 完整中文文档：[README.md](./README.md)。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-334EAC.svg)](./LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-%3E%3D0.2.0--rc.1%20%3C0.2.1-081F5C.svg)](https://github.com/deepseek-ai/deepseek-harness)
 [![Node](https://img.shields.io/badge/Node-%E2%89%A522.3-7096D1.svg)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-2ea043.svg)](#development)
-[![CI](https://github.com/MorixMa/dsh-task-progress/actions/workflows/ci.yml/badge.svg)](https://github.com/MorixMa/dsh-task-progress/actions/workflows/ci.yml)
+[![CI](https://github.com/MorixMa/dsh-download-progress/actions/workflows/ci.yml/badge.svg)](https://github.com/MorixMa/dsh-download-progress/actions/workflows/ci.yml)
 
 ---
 
-## The problem it solves
+## What this plugin is for
 
-Once a background job is running, your only options are staring at a terminal or repeatedly
-asking the model "is it done yet?". This plugin turns that into **one glance**: an icon in the
-top-right of the session header lights up with a progress ring and a count badge while work is
-running; clicking it opens a task list, one animated progress bar per task. When a download
-finishes, one click on its filename opens the file.
+**It watches one thing: downloads.**
+
+In DSH, downloads almost always happen as **background jobs**: `curl` / `wget` / `aria2c`
+pulling model weights, installers, datasets, font packs, or a package manager fetching
+dependencies. Their progress only ever appears in the **job's output**, so your options are
+staring at a terminal, repeatedly asking the model "is it done yet?", or simply forgetting that
+it is still running.
+
+This plugin turns that into **one glance**: an icon in the top-right of the session header lights
+up with a progress ring and a count badge while downloads are running; clicking it opens a list
+with one animated progress bar per task, carrying percentage, transferred / total, speed and ETA.
+When a download finishes, one click on its filename opens the file.
 
 It **does not start jobs, kill jobs, or write files** — it is a pure observer. The single
 exception is *open file* / *reveal in folder*, which requires an explicit click and only works
 on the files the panel is currently showing.
 
+> **Why does it list other background jobs too?** Because in DSH, downloads and ordinary
+> background jobs share **one roster** (`ctx.jobs`) — the plugin cannot, and should not, guess
+> which entry is a download. So it reads the whole roster: anything with parseable progress
+> becomes a progress bar, anything without becomes an unknown-progress barber-pole. For downloads
+> that is exactly what you want; for other jobs it doubles as a general progress board.
+
 ## Features
 
+- **Written for downloader output.** The parser understands what real downloaders actually
+  print: curl `--progress-bar`'s `\r`-refreshed meter, wget's
+  `45%[===>  ] 7.98M 1.21MB/s eta 8s`, aria2's summary lines, the common
+  `transferred x / y` shapes, and generic JSON progress files.
 - **No third-party plugin required.** The client-side Slot registry and the host `webServer`
   are both DSH core capabilities. Whether plugins like `dsh-better-sidebar` are installed makes
   no difference.
@@ -50,7 +67,7 @@ on the files the panel is currently showing.
 ### From GitHub
 
 ```powershell
-dsh plugin --profile <profile-name> add github:MorixMa/dsh-task-progress
+dsh plugin --profile <profile-name> add github:MorixMa/dsh-download-progress
 ```
 
 The artifacts (`lib/`) are committed to the repository, so the installing side **never** runs a
@@ -184,8 +201,8 @@ Configuration lives in the plugin's loader row `config:`. Defaults ship in the p
 | `pollIntervalMs` | `number` | `1500` | Client poll interval, clamped to 500–60000 |
 
 ```yaml
-- id: task-progress
-  name: dsh-task-progress
+- id: download-progress
+  name: dsh-download-progress
   config:
     progressSources:
       - 'D:\下载\字体_进度.md'
@@ -200,7 +217,7 @@ Configuration lives in the plugin's loader row `config:`. Defaults ship in the p
 
 `ctx.settings.register(ns, schema)` was **removed in DSH 0.1.7**. Its replacement is the host's
 `SettingsForms`, whose rule is: *the namespace is the plugin loader row's entry id (here
-`task-progress`), and the form schema is the `Config` the plugin module exports*. This plugin
+`download-progress`), and the form schema is the `Config` the plugin module exports*. This plugin
 follows that rule.
 
 The honest caveat: `Config` uses the **Standard Schema** shape, not the host's built-in
@@ -219,11 +236,11 @@ both be satisfied, so this plugin chose "the plugin always installs".
 
 | Symptom | Cause / fix |
 |---|---|
-| No download icon in the session header | The client half did not load. Check that `dsh.profile.bundles` contains `dsh-task-progress`, then **hard-refresh** (Ctrl+Shift+R); if it persists, restart DSH |
+| No download icon in the session header | The client half did not load. Check that `dsh.profile.bundles` contains `dsh-download-progress`, then **hard-refresh** (Ctrl+Shift+R); if it persists, restart DSH |
 | The icon is there but the panel says "Failed to fetch" | The host route is not mounted — **restart DSH**. Host-half changes always need a restart |
 | "HTTP 403" from the route | The trust fence refused it. This never happens on desktop (the shell origin `dsh-app://app` is allowed); it means the request came from another origin, or the GUI is behind a non-loopback reverse proxy — add that authority to the deployment's `trustedHosts` |
 | Always "no running tasks" | The empty state lists why each source is empty |
-| The bar is always the barber-pole (unknown progress) | That job's output contains no recognisable progress. Run `curl "http://127.0.0.1:19387/task-progress"` and look at that task's `raw` field |
+| The bar is always the barber-pole (unknown progress) | That job's output contains no recognisable progress. Run `curl "http://127.0.0.1:19387/download-progress"` and look at that task's `raw` field |
 | Speed is always empty | The source prints no speed and the byte count did not change between polls (no baseline for the delta). Two samples are needed |
 | The bar is stuck at some number | Normal — progress comes from the source; if the source does not update, neither does the bar. Check the "refreshed at" timestamp in the footer to confirm polling is alive |
 | Parsed numbers look wrong | Compare against *Supported progress formats* above, or open an issue with those raw lines |
@@ -263,8 +280,8 @@ both be satisfied, so this plugin chose "the plugin always installs".
 
 | Route | Side effects | Authorisation |
 |---|---|---|
-| `GET /task-progress` | **None** (no file writes, no job kills, no cursor movement) | Browser trust fence |
-| `POST /task-progress/open` | Makes the host open a file with the OS default application, or reveal it in the file manager | Trust fence **+ allowlist** |
+| `GET /download-progress` | **None** (no file writes, no job kills, no cursor movement) | Browser trust fence |
+| `POST /download-progress/open` | Makes the host open a file with the OS default application, or reveal it in the file manager | Trust fence **+ allowlist** |
 
 Fence rules (the same as DSH's `/api` gateway): the `Host` must be loopback or a deployment
 `trustedHosts` entry; `Sec-Fetch-Site: cross-site` is always refused; when an `Origin` is present
@@ -292,7 +309,7 @@ buttons simply do not appear, rather than failing when clicked.
 ### The fence is the only gate on these routes
 
 **Verified:** DSH's web token only covers its own `/api*` — `GET /api/modules` without a token
-returns 401, while a plugin-registered `GET /task-progress` returns 200. So any **local** process
+returns 401, while a plugin-registered `GET /download-progress` returns 200. So any **local** process
 can read the task list. That is the platform convention; don't install it if you don't want it.
 
 ---
@@ -316,8 +333,8 @@ src/host/    00-runtime.js  →  builtin-module shim, JSON responses, trust fenc
              20-parse.js    →  progress parsing, filename/path extraction, display stripping
              30-sources.js  →  progress source file scanning
              40-tasks.js    →  three-source task assembly
-             50-route.js    →  GET /task-progress
-             60-open.js     →  POST /task-progress/open (allowlist + native opener)
+             50-route.js    →  GET /download-progress
+             60-open.js     →  POST /download-progress/open (allowlist + native opener)
              90-entry.js    →  apply / inject
 src/client/  00-format.js   →  number formatting (Chinese)
              05-route.js    →  host route URL resolution

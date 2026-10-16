@@ -160,7 +160,7 @@ check('配置：progressSources 去空项', host.narrowConfig({ progressSources:
 check('配置：未知字段被拒', host.configProblems({ nope: 1 }).length === 1, JSON.stringify(host.configProblems({ nope: 1 })))
 check('配置：Standard Schema 形状',
   host.Config['~standard'].version === 1
-  && host.Config['~standard'].vendor === 'dsh-task-progress'
+  && host.Config['~standard'].vendor === 'dsh-download-progress'
   && Array.isArray(host.Config['~standard'].validate({}).value.progressSources)
   && host.Config['~standard'].validate({}).value.pollIntervalMs === 1500
   && Array.isArray(host.Config['~standard'].validate({ nope: 1 }).issues))
@@ -199,7 +199,7 @@ check('聚合：口径标记为 bytes', agg.basis === 'bytes', agg.basis)
  * @param {string} [method] - 方法。
  * @returns {{ method: string, url: string, headers: Record<string, string> }} 请求。
  */
-const req = (headers, method = 'GET') => ({ method, url: '/task-progress', headers })
+const req = (headers, method = 'GET') => ({ method, url: '/download-progress', headers })
 check('围栏：回环 Host 放行', host.isTrustedRequest(req({ host: '127.0.0.1:19387' }), []))
 check('围栏：localhost 放行', host.isTrustedRequest(req({ host: 'localhost:19387' }), []))
 check('围栏：局域网 Host 拒绝', host.isTrustedRequest(req({ host: '192.168.1.20:19387' }), []) === false)
@@ -235,13 +235,13 @@ function fakeResponse() {
 }
 const fakeRouteCtx = { get: () => undefined }
 const route = host.createTaskProgressRoute(fakeRouteCtx, host.narrowConfig(undefined))
-check('路由种类是 exact、路径是 /task-progress',
-  route.kind === 'exact' && route.path === '/task-progress', `${route.kind} ${route.path}`)
+check('路由种类是 exact、路径是 /download-progress',
+  route.kind === 'exact' && route.path === '/download-progress', `${route.kind} ${route.path}`)
 const forbidden = fakeResponse()
 await route.handler(req({ host: '10.0.0.5:19387' }), forbidden)
 check('路由：非可信 Host 返回 403', forbidden.statusCode === 403, String(forbidden.statusCode))
 const wrongMethod = fakeResponse()
-await route.handler({ method: 'POST', url: '/task-progress', headers: { host: '127.0.0.1:19387' } }, wrongMethod)
+await route.handler({ method: 'POST', url: '/download-progress', headers: { host: '127.0.0.1:19387' } }, wrongMethod)
 check('路由：非 GET 返回 405', wrongMethod.statusCode === 405, String(wrongMethod.statusCode))
 const okResponse = fakeResponse()
 await route.handler(req({ host: '127.0.0.1:19387' }), okResponse)
@@ -274,7 +274,7 @@ check('合成：三路来源都被登记', combined.sources.map(source => source
   combined.sources.map(source => source.id).join(','))
 
 // ── 进度源文件（③）：真的读一次磁盘（走 process.getBuiltinModule） ─────────
-const demoDir = mkdtempSync(join(tmpdir(), 'dtp-'))
+const demoDir = mkdtempSync(join(tmpdir(), 'ddp-'))
 try {
   const demoMarkdown = join(demoDir, 'progress.md')
   const demoJson = join(demoDir, 'task.json')
@@ -377,7 +377,7 @@ check('装配：没有 sessionController 时如实报不可用',
 
 // ── 打开路由：白名单 / 方法 / 围栏 ─────────────────────────────────────────
 const openRoute = host.createTaskProgressOpenRoute(ctxWithJobs)
-check('打开路由：路径是 /task-progress/open', openRoute.path === '/task-progress/open' && openRoute.kind === 'exact',
+check('打开路由：路径是 /download-progress/open', openRoute.path === '/download-progress/open' && openRoute.kind === 'exact',
   `${openRoute.kind} ${openRoute.path}`)
 
 /**
@@ -392,7 +392,7 @@ function postRequest(headers, method = 'POST', body = undefined) {
   const listeners = { data: [], end: [], error: [] }
   const request = {
     method,
-    url: '/task-progress/open',
+    url: '/download-progress/open',
     headers,
     on(event, handler) {
       if (listeners[event] === undefined) listeners[event] = []
@@ -468,7 +468,7 @@ try {
 }
 check('apply() 不抛异常', applyThrew === null, String(applyThrew))
 check('apply() 挂了恰好两条路由：状态 + 打开',
-  appliedRoutes.length === 2 && appliedRoutes.map(route => route.path).join(',') === '/task-progress,/task-progress/open',
+  appliedRoutes.length === 2 && appliedRoutes.map(route => route.path).join(',') === '/download-progress,/download-progress/open',
   appliedRoutes.map(route => `${route.kind} ${route.path}`).join(' | '))
 check('apply() 两条 effect 都带说明标签', effectLabels.length === 2 && effectLabels.every(label => typeof label === 'string'),
   effectLabels.join(' | '))

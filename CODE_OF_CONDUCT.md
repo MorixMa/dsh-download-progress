@@ -12,7 +12,7 @@
 - 维护者有权删除、编辑或拒绝不符合本公约的评论、提交、代码与 issue。
 
 **报告渠道**：不要在公开 issue 里贴细节。请通过
-[GitHub Security Advisory](https://github.com/MorixMa/dsh-task-progress/security/advisories/new)
+[GitHub Security Advisory](https://github.com/MorixMa/dsh-download-progress/security/advisories/new)
 或给维护者发 GitHub 私信。所有投诉都会被**及时且公正**地审阅与处理，维护者有义务为
 报告者保密。
 

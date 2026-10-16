@@ -3,7 +3,7 @@
 本文件给的是**可直接复制执行**的步骤（Windows / PowerShell）。
 
 > 本文里的 `<仓库绝对路径>` 指本仓库在你机器上的位置，例如
-> `D:\code\dsh-task-progress`；`<DSH_HOME>` 通常是你自己的 `~\.dsh`。
+> `D:\code\dsh-download-progress`；`<DSH_HOME>` 通常是你自己的 `~\.dsh`。
 > 示例脚本在仓库的 [`examples/`](./examples/) 里。
 
 所有命令里的 profile 名以 `desktop` 为例（那是最常见的宿主），插件目录即
@@ -70,16 +70,16 @@ $ dsh --version
 ### 1.2 这条命令做了什么
 
 1. 在 `<DSH_HOME>\profiles\desktop\package.json` 的 `dependencies` 里写入
-   `"dsh-task-progress": "link:<仓库绝对路径>"`；
-2. 把 `dsh-task-progress` 追加进同一个文件的 `dsh.profile.bundles` 数组（**末尾**，
+   `"dsh-download-progress": "link:<仓库绝对路径>"`；
+2. 把 `dsh-download-progress` 追加进同一个文件的 `dsh.profile.bundles` 数组（**末尾**，
    在 `dsh-better-sidebar` 之后）；
-3. 在 profile 目录里跑 pnpm 安装，把软链建到 `profile\node_modules\dsh-task-progress`。
+3. 在 profile 目录里跑 pnpm 安装，把软链建到 `profile\node_modules\dsh-download-progress`。
 
 **实测输出**（`installed` + `enabled`，`exitCode: 0`）：
 
 ```
 dependencies:
-+ dsh-task-progress link:<仓库绝对路径>
++ dsh-download-progress link:<仓库绝对路径>
 Done in 1.6s using pnpm v11.7.0
 ```
 
@@ -87,7 +87,7 @@ Done in 1.6s using pnpm v11.7.0
 
 ## 2. 重启 DSH（**必需**）
 
-host 半边（路由 `/task-progress`）是在插件装载时注册的，**必须重启 DSH** 才生效。
+host 半边（路由 `/download-progress`）是在插件装载时注册的，**必须重启 DSH** 才生效。
 客户端半边会随页面重新拉取，重启后**硬刷新浏览器**（Ctrl+Shift+R）最稳妥。
 
 ---
@@ -107,7 +107,7 @@ node tests\verify-install.mjs
 ### 3.2 路由通不通
 
 ```powershell
-curl.exe -s "http://127.0.0.1:19387/task-progress" | ConvertFrom-Json | Select-Object -ExpandProperty value | Select-Object generatedAt, pollIntervalMs
+curl.exe -s "http://127.0.0.1:19387/download-progress" | ConvertFrom-Json | Select-Object -ExpandProperty value | Select-Object generatedAt, pollIntervalMs
 ```
 
 期望拿到 `{ ok: true, value: { … } }` 信封。**404** = host 半边没装上（回去看第 2 步
@@ -150,8 +150,8 @@ pwsh -File <仓库绝对路径>\examples\demo-download.ps1 -Steps 600 -DelayMs 1
 （按 Loader 行 id 寻址的覆盖层，追加在文件末尾即可）：
 
 ```yaml
-- id: task-progress
-  name: dsh-task-progress
+- id: download-progress
+  name: dsh-download-progress
   config:
     progressSources:
       - '<工作目录>\demo-progress.md'
@@ -169,7 +169,7 @@ pwsh -File <仓库绝对路径>\examples\demo-download.ps1 -Steps 600 -DelayMs 1
 指示器是**常驻**的（图标上的环形进度要一直准），所以打开会话时它按服务端下发的
 `pollIntervalMs` 一直轮询；**离开会话 / 卸载插件即停**。验证方式：
 
-1. 开发者工具 → Network，过滤 `task-progress`：应有每约 1.5 秒一条；
+1. 开发者工具 → Network，过滤 `download-progress`：应有每约 1.5 秒一条；
 2. 切到一个没有会话的页面（或切换会话）→ 请求应停止/换到新会话。
 
 （卸载时 `AbortController.abort()` + `clearTimeout`，见 `src/client/30-view.js` 的轮询 effect；
@@ -181,9 +181,9 @@ pwsh -File <仓库绝对路径>\examples\demo-download.ps1 -Steps 600 -DelayMs 1
 
 | 入口 | 做法 |
 |---|---|
-| **AI 助手（本会话）** | `plugin_manager` 工具，`action: remove_bundle`，`target: dsh-task-progress` |
+| **AI 助手（本会话）** | `plugin_manager` 工具，`action: remove_bundle`，`target: dsh-download-progress` |
 | **DSH GUI** | 「设置 → 插件」里把本插件移除 |
-| **其它 profile（非 desktop）** | 终端 `dsh plugin --profile <名字> remove dsh-task-progress` |
+| **其它 profile（非 desktop）** | 终端 `dsh plugin --profile <名字> remove dsh-download-progress` |
 
 它会从 `dependencies` 与 `dsh.profile.bundles` 里摘掉本插件并跑一次 pnpm。
 **插件目录本身不会被删**——那是你的源码：
@@ -192,17 +192,17 @@ pwsh -File <仓库绝对路径>\examples\demo-download.ps1 -Steps 600 -DelayMs 1
 Remove-Item -Recurse -Force '<仓库绝对路径>'
 ```
 
-**实测**：卸载后 profile 的 `package.json` 里 `task-progress` 出现次数为 **0**，
+**实测**：卸载后 profile 的 `package.json` 里 `dsh-download-progress` 出现次数为 **0**，
 依赖回到 13 条、bundles 回到 16 条，`pnpm-lock.yaml` 与 `node_modules/.modules.yaml`
-都没有残留，正在跑的 host 半边随即卸载（`GET /task-progress` 从 200 变 **404**），
+都没有残留，正在跑的 host 半边随即卸载（`GET /download-progress` 从 200 变 **404**），
 DSH 全程没有重启也没有报错。
 
-> ⚠️ **一处残留**：`node_modules\dsh-task-progress` 这条**软链**可能不被 pnpm 清掉
+> ⚠️ **一处残留**：`node_modules\dsh-download-progress` 这条**软链**可能不被 pnpm 清掉
 > （`link:` 协议在 `nodeLinker: hoisted` 下的行为）。它是惰性的——profile 清单里已经
 > 没有它，DSH 不会装载它——但想彻底干净就手动删掉：
 >
 > ```powershell
-> Remove-Item '<DSH_HOME>\profiles\desktop\node_modules\dsh-task-progress' -Force
+> Remove-Item '<DSH_HOME>\profiles\desktop\node_modules\dsh-download-progress' -Force
 > ```
 >
 > （这是**软链**，`Remove-Item` 不带 `-Recurse` 只删链接本身，不会动
@@ -218,9 +218,9 @@ DSH 全程没有重启也没有报错。
 
 | 文件 | 改动 | 回滚 |
 |---|---|---|
-| `<DSH_HOME>\profiles\desktop\package.json` | `dependencies` 增加一条 `link:`；`dsh.profile.bundles` 追加 `dsh-task-progress` | `plugin_manager` → `remove_bundle dsh-task-progress` |
+| `<DSH_HOME>\profiles\desktop\package.json` | `dependencies` 增加一条 `link:`；`dsh.profile.bundles` 追加 `dsh-download-progress` | `plugin_manager` → `remove_bundle dsh-download-progress` |
 | `<DSH_HOME>\profiles\desktop\pnpm-lock.yaml` | pnpm 自己维护，随上一条命令一起回退 | 同上 |
-| `<DSH_HOME>\profiles\desktop\node_modules\dsh-task-progress` | 指向插件目录的软链 | 同上（自动删，偶有残留见 §4） |
+| `<DSH_HOME>\profiles\desktop\node_modules\dsh-download-progress` | 指向插件目录的软链 | 同上（自动删，偶有残留见 §4） |
 | `<DSH_HOME>\profiles\desktop\cordis.patch.yml` | **不动**（本插件自带 patch，由 bundle 层合并） | — |
 
 插件目录内不含 `node_modules`，所以 `link:` 安装不会把依赖树带进 profile。

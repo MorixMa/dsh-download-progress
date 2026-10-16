@@ -68,7 +68,7 @@ export function concatFragments(half, files) {
 export function buildHostSource() {
   return [
     '/* eslint-disable */',
-    '// dsh-task-progress —— host 半边（由 tools/build.mjs 生成，请勿手改）。',
+    '// dsh-download-progress —— host 半边（由 tools/build.mjs 生成，请勿手改）。',
     '// 自包含：零 import / 零 require。Node 内建模块经 process.getBuiltinModule() 取。',
     '',
     concatFragments('host', HOST_FRAGMENTS),
@@ -85,7 +85,7 @@ export function buildHostSource() {
  */
 export function buildClientSource(packageName) {
   return [
-    '// dsh-task-progress —— client 半边（由 tools/build.mjs 生成，请勿手改）。',
+    '// dsh-download-progress —— client 半边（由 tools/build.mjs 生成，请勿手改）。',
     '// 宿主模块（react）走 require 外部引用，不打包进产物。',
     'window.__ModuleLoader__.load({',
     `\tid: ${JSON.stringify(packageName)},`,

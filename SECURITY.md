@@ -4,7 +4,7 @@
 
 **请不要开公开 issue。** 用 GitHub 的私密渠道：
 
-- [Security Advisories → Report a vulnerability](https://github.com/MorixMa/dsh-task-progress/security/advisories/new)
+- [Security Advisories → Report a vulnerability](https://github.com/MorixMa/dsh-download-progress/security/advisories/new)
 
 如果这个入口不可用，就在 issue 里只写「我想报告一个安全问题，请给我一个私密联系方式」，
 不要带任何细节。我们会在 72 小时内回你。
@@ -18,8 +18,8 @@
 
 | 路由 | 副作用 | 授权 |
 |---|---|---|
-| `GET /task-progress` | 无 | 浏览器信任围栏（回环 Host 或部署声明的 `trustedHosts`；拒 `Sec-Fetch-Site: cross-site`；带 `Origin` 时须与 Host 同名或是桌面壳的 `dsh-app://app`） |
-| `POST /task-progress/open` | 让宿主用系统默认应用打开文件 / 在文件管理器里定位 | 信任围栏 **+ 短时白名单** |
+| `GET /download-progress` | 无 | 浏览器信任围栏（回环 Host 或部署声明的 `trustedHosts`；拒 `Sec-Fetch-Site: cross-site`；带 `Origin` 时须与 Host 同名或是桌面壳的 `dsh-app://app`） |
+| `POST /download-progress/open` | 让宿主用系统默认应用打开文件 / 在文件管理器里定位 | 信任围栏 **+ 短时白名单** |
 
 `open` 路由的白名单是**插件自己在采集任务时写入**的已知产物绝对路径（TTL 10 分钟、
 上限 128 条）。不在白名单里的路径一律 403，连 `stat` 都不做——所以它不能被当作
@@ -30,10 +30,10 @@
 
 已知的、被接受的行为：
 
-- `GET /task-progress` 会暴露任务标签，而 DSH 后台任务的标签常常是**整行命令行**。
+- `GET /download-progress` 会暴露任务标签，而 DSH 后台任务的标签常常是**整行命令行**。
   这是本机可达的只读信息，与 DSH 自带的任务抽屉一致。界面侧只显示文件名，但**接口本身
   仍然会返回完整标签**——这是刻意保留的（排查问题时需要它）。
-- 任务产物的**绝对路径**会出现在 `GET /task-progress` 的响应里（`filePath` 字段），
+- 任务产物的**绝对路径**会出现在 `GET /download-progress` 的响应里（`filePath` 字段），
   因为选中它才能打开 / 定位。界面不渲染它。
 
 ## 支持范围

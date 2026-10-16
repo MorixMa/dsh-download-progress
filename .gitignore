@@ -17,5 +17,5 @@ pnpm-debug.log*
 *.tmp
 
 # 注意：lib/ 是**故意提交**的预构建产物。
-# 本插件的安装方式是 `dsh plugin add github:MorixMa/dsh-task-progress` 或 `link:`，
+# 本插件的安装方式是 `dsh plugin add github:MorixMa/dsh-download-progress` 或 `link:`，
 # 两种情况都不会在安装端跑构建 —— 产物必须随仓库走。不要把它加进忽略列表。

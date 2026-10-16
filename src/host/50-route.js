@@ -1,5 +1,5 @@
 /**
- * 只读状态路由 `GET /task-progress`。
+ * 只读状态路由 `GET /download-progress`。
  *
  * 契约（与 DSH 其它 JSON 路由一致的应答信封）：
  *   200 `{ ok: true, value: { generatedAt, pollIntervalMs, sources, tasks } }`
@@ -10,7 +10,7 @@
  * 这条路由**没有任何写路径**：不改文件、不杀任务、不推进任何游标。查询参数只认
  * `sessionId`（可选），用来把访问围栏设到某个会话上——不带时只能看见无主任务。
  *
- * 会写的那条（打开文件 / 定位文件夹）在 `60-open.js` 的 `POST /task-progress/open`，
+ * 会写的那条（打开文件 / 定位文件夹）在 `60-open.js` 的 `POST /download-progress/open`，
  * 它有独立的白名单授权，与这条分开。
  */
 
@@ -38,7 +38,7 @@ function trustedHostsOf(ctx) {
 function createTaskProgressRoute(ctx, config) {
   return {
     kind: 'exact',
-    path: '/task-progress',
+    path: '/download-progress',
     /**
      * @param {any} req - HTTP 请求。
      * @param {any} res - HTTP 响应。
@@ -53,7 +53,7 @@ function createTaskProgressRoute(ctx, config) {
         return
       }
       try {
-        const url = new URL(req.url ?? '/task-progress', 'http://dsh.internal')
+        const url = new URL(req.url ?? '/download-progress', 'http://dsh.internal')
         const value = collectTasks(ctx, config, url.searchParams.get('sessionId') ?? undefined)
         sendJson(res, 200, { ok: true, value })
       } catch (error) {

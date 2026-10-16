@@ -1,10 +1,10 @@
 /**
- * dsh-task-progress —— host 半边入口。
+ * dsh-download-progress —— host 半边入口。
  *
  * 挂两条路由到宿主 webServer：
- * - `GET  /task-progress`       只读状态（数据来自三路：dsh-ops/background 服务 →
+ * - `GET  /download-progress`       只读状态（数据来自三路：dsh-ops/background 服务 →
  *                               宿主 `ctx.jobs` 注册表 → 配置的进度源文件）
- * - `POST /task-progress/open`  用系统默认应用打开产物 / 在文件管理器里定位它。
+ * - `POST /download-progress/open`  用系统默认应用打开产物 / 在文件管理器里定位它。
  *                               这条有副作用，所以带一份"只认本插件刚报告过的文件"
  *                               的短时白名单（见 60-open.js）。
  *
@@ -30,16 +30,16 @@ function apply(ctx, config) {
   const resolved = narrowConfig(config)
   ctx.effect(
     () => ctx.webServer.register(createTaskProgressRoute(ctx, resolved)),
-    'dsh-task-progress: GET /task-progress',
+    'dsh-download-progress: GET /download-progress',
   )
   ctx.effect(
     () => ctx.webServer.register(createTaskProgressOpenRoute(ctx)),
-    'dsh-task-progress: POST /task-progress/open',
+    'dsh-download-progress: POST /download-progress/open',
   )
   const logger = ctx.logger
   if (logger !== undefined && typeof logger.info === 'function') {
     const sources = resolved.progressSources.length
     const desktop = canOpenWithDesktop(ctx) ? '可用' : '不可用'
-    logger.info(`dsh-task-progress: /task-progress 就绪（轮询 ${resolved.pollIntervalMs}ms，进度源 ${sources} 个，原生打开${desktop}）`)
+    logger.info(`dsh-download-progress: /download-progress 就绪（轮询 ${resolved.pollIntervalMs}ms，进度源 ${sources} 个，原生打开${desktop}）`)
   }
 }

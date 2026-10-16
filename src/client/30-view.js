@@ -27,7 +27,7 @@ const FRESH_MS = 10000
  */
 function TaskGlyph() {
   return h('svg', {
-    className: 'dtp-glyph', width: 16, height: 16, viewBox: '0 0 16 16', fill: 'none',
+    className: 'ddp-glyph', width: 16, height: 16, viewBox: '0 0 16 16', fill: 'none',
     stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round',
     'aria-hidden': 'true',
   },
@@ -58,12 +58,12 @@ function ProgressRing(props) {
   const percent = num(props.percent)
   const offset = percent === undefined ? RING_CIRCUMFERENCE : RING_CIRCUMFERENCE * (1 - Math.max(0, Math.min(100, percent)) / 100)
   return h('svg', {
-    className: `dtp-ring${props.spin ? ' dtp-ring--spin' : ''}`,
+    className: `ddp-ring${props.spin ? ' ddp-ring--spin' : ''}`,
     viewBox: '0 0 28 28', width: 28, height: 28, 'aria-hidden': 'true',
   },
-  h('circle', { className: 'dtp-ring-track', cx: 14, cy: 14, r: RING_RADIUS }),
+  h('circle', { className: 'ddp-ring-track', cx: 14, cy: 14, r: RING_RADIUS }),
   h('circle', {
-    className: 'dtp-ring-fill', cx: 14, cy: 14, r: RING_RADIUS,
+    className: 'ddp-ring-fill', cx: 14, cy: 14, r: RING_RADIUS,
     style: { strokeDasharray: `${RING_CIRCUMFERENCE} ${RING_CIRCUMFERENCE}`, strokeDashoffset: offset },
   }))
 }
@@ -78,20 +78,20 @@ function TaskBar(props) {
   const metrics = task.metrics ?? {}
   const percent = num(metrics.percent)
   const running = task.status === 'running' || task.status === 'stopping'
-  const variant = task.status === 'completed' ? ' dtp-fill--done'
-    : (task.status === 'failed' || task.status === 'killed') ? ' dtp-fill--failed'
-      : running ? ' dtp-fill--live' : ' dtp-fill--idle'
+  const variant = task.status === 'completed' ? ' ddp-fill--done'
+    : (task.status === 'failed' || task.status === 'killed') ? ' ddp-fill--failed'
+      : running ? ' ddp-fill--live' : ' ddp-fill--idle'
   if (percent === undefined) {
     return h('div', {
-      className: 'dtp-track dtp-track--unknown', role: 'progressbar',
+      className: 'ddp-track ddp-track--unknown', role: 'progressbar',
       'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': '进度未知',
-    }, h('i', { className: `dtp-fill${variant}` }))
+    }, h('i', { className: `ddp-fill${variant}` }))
   }
   const clamped = Math.max(0, Math.min(100, percent))
   return h('div', {
-    className: 'dtp-track', role: 'progressbar',
+    className: 'ddp-track', role: 'progressbar',
     'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(clamped),
-  }, h('i', { className: `dtp-fill${variant}`, style: { width: `${clamped}%` } }))
+  }, h('i', { className: `ddp-fill${variant}`, style: { width: `${clamped}%` } }))
 }
 
 /**
@@ -109,7 +109,7 @@ function TaskRow(props) {
 
   const parts = []
   const percent = formatPercent(metrics.percent)
-  if (percent !== '') parts.push(h('span', { className: 'dtp-pct', key: 'p' }, percent))
+  if (percent !== '') parts.push(h('span', { className: 'ddp-pct', key: 'p' }, percent))
   const ratio = formatRatio(metrics.done, metrics.total)
   if (ratio !== '') parts.push(h('span', { key: 'r' }, ratio))
   if (num(metrics.bytes) !== undefined || num(metrics.bytesTotal) !== undefined) {
@@ -130,29 +130,29 @@ function TaskRow(props) {
   const nameNode = openable
     ? h('button', {
       type: 'button',
-      className: 'dtp-name dtp-name--link',
+      className: 'ddp-name ddp-name--link',
       title: '打开这个文件',
       onClick: () => props.onAction('open', task),
     }, label)
-    : h('span', { className: 'dtp-name' }, label)
+    : h('span', { className: 'ddp-name' }, label)
 
   return h('div', {
-    className: `dtp-row${settled ? ' dtp-row--settled' : ''}${fresh ? ' dtp-row--fresh' : ''}`,
+    className: `ddp-row${settled ? ' ddp-row--settled' : ''}${fresh ? ' ddp-row--fresh' : ''}`,
   },
-  h('div', { className: 'dtp-row-head' },
+  h('div', { className: 'ddp-row-head' },
     nameNode,
-    h('span', { className: `dtp-state dtp-state--${task.status}` }, task.statusLabel ?? task.status),
+    h('span', { className: `ddp-state ddp-state--${task.status}` }, task.statusLabel ?? task.status),
     revealable
       ? h('button', {
         type: 'button',
-        className: 'dtp-icon-btn',
+        className: 'ddp-icon-btn',
         title: '打开所在文件夹',
         disabled: busy,
         onClick: () => props.onAction('reveal', task),
       }, FolderGlyph())
       : null),
   h(TaskBar, { task }),
-  parts.length > 0 ? h('div', { className: 'dtp-meta' }, parts) : null)
+  parts.length > 0 ? h('div', { className: 'ddp-meta' }, parts) : null)
 }
 
 /**
@@ -165,9 +165,9 @@ function EmptyState(props) {
   const notes = sources
     .filter(source => source !== null && typeof source === 'object' && source.available !== true && typeof source.reason === 'string')
     .map(source => `${source.label}：${source.reason}`)
-  return h('div', { className: 'dtp-empty' },
-    h('div', { className: 'dtp-empty-title' }, '现在没有运行中的任务'),
-    h('div', { className: 'dtp-empty-hint' },
+  return h('div', { className: 'ddp-empty' },
+    h('div', { className: 'ddp-empty-title' }, '现在没有运行中的任务'),
+    h('div', { className: 'ddp-empty-hint' },
       h('div', null, '有新任务开始时，这个图标会自动亮起环形进度。'),
       notes.length > 0 ? h('div', null, `尚未就绪的来源：${notes.join('；')}`) : null,
       h('div', null, '想看自己的下载进度，把进度文件或目录的绝对路径填进插件的 progressSources 配置即可。')))
@@ -287,7 +287,7 @@ function TaskProgressIndicator(props) {
   const ringPercent = hasRunning ? agg.percent : null
   const spin = hasRunning && agg.percent === null
 
-  // 「打开 / 打开所在文件夹」走 host 的 POST /task-progress/open；宿主只接受它自己
+  // 「打开 / 打开所在文件夹」走 host 的 POST /download-progress/open；宿主只接受它自己
   // 刚报告过的路径（短时白名单），客户端拿不到别的入口。
   const runAction = async (action, task) => {
     if (typeof task.filePath !== 'string' || task.filePath === '') return
@@ -314,7 +314,7 @@ function TaskProgressIndicator(props) {
     }
   }
 
-  const badgeClass = hasRunning ? ' dtp-count--live' : (failed > 0 ? ' dtp-count--fail' : '')
+  const badgeClass = hasRunning ? ' ddp-count--live' : (failed > 0 ? ' ddp-count--fail' : '')
   const badgeText = hasRunning ? (agg.running > 99 ? '99+' : String(agg.running)) : (failed > 0 ? String(failed) : null)
 
   const summary = []
@@ -330,12 +330,12 @@ function TaskProgressIndicator(props) {
   const body = (() => {
     if (snapshot.phase === 'error' && snapshot.payload === null) {
       return h('div', null,
-        h('div', { className: 'dtp-error' }, `读取任务进度失败：${snapshot.error}`),
-        h('div', { className: 'dtp-empty-hint', style: { padding: '0 12px 14px' } },
+        h('div', { className: 'ddp-error' }, `读取任务进度失败：${snapshot.error}`),
+        h('div', { className: 'ddp-empty-hint', style: { padding: '0 12px 14px' } },
           'host 半边要重启 DSH 才会挂上路由；确认已重启，再点右下角「刷新」。'))
     }
     if (snapshot.phase === 'loading' && snapshot.payload === null) {
-      return h('div', { className: 'dtp-empty' }, h('div', { className: 'dtp-empty-title' }, '正在读取任务进度…'))
+      return h('div', { className: 'ddp-empty' }, h('div', { className: 'ddp-empty-title' }, '正在读取任务进度…'))
     }
     if (tasks.length === 0) return h(EmptyState, { sources })
     return tasks.map(task => h(TaskRow, {
@@ -352,7 +352,7 @@ function TaskProgressIndicator(props) {
     h('button', {
       type: 'button',
       ref: triggerRef,
-      className: 'dtp-trigger',
+      className: 'ddp-trigger',
       'data-open': open ? '1' : '0',
       'aria-haspopup': 'dialog',
       'aria-expanded': open ? 'true' : 'false',
@@ -361,27 +361,27 @@ function TaskProgressIndicator(props) {
     },
     h(ProgressRing, { percent: ringPercent, spin }),
     h(TaskGlyph),
-    badgeText !== null ? h('span', { className: `dtp-count${badgeClass}` }, badgeText) : null),
+    badgeText !== null ? h('span', { className: `ddp-count${badgeClass}` }, badgeText) : null),
 
     open ? h('div', {
       ref: popRef,
-      className: 'dtp-pop',
+      className: 'ddp-pop',
       role: 'dialog',
       'aria-label': '任务进度',
       style: anchor === null ? { top: 64, right: 16 } : { top: anchor.top, right: anchor.right },
     },
-    h('div', { className: 'dtp-head' },
-      h('div', { className: 'dtp-head-top' },
-        h('span', { className: 'dtp-title' }, '下载与任务'),
-        h('span', { className: 'dtp-sub' }, hasRunning ? `${agg.running} 个运行中` : '空闲')),
+    h('div', { className: 'ddp-head' },
+      h('div', { className: 'ddp-head-top' },
+        h('span', { className: 'ddp-title' }, '下载与任务'),
+        h('span', { className: 'ddp-sub' }, hasRunning ? `${agg.running} 个运行中` : '空闲')),
       hasRunning ? h(TaskBar, { task: { status: 'running', metrics: { percent: agg.percent } } }) : null,
-      summary.length > 0 ? h('div', { className: 'dtp-meta' }, summary.map((text, index) => h('span', { key: index }, text))) : null),
-    h('div', { className: 'dtp-list' }, body),
+      summary.length > 0 ? h('div', { className: 'ddp-meta' }, summary.map((text, index) => h('span', { key: index }, text))) : null),
+    h('div', { className: 'ddp-list' }, body),
     actionNote !== null
-      ? h('div', { className: `dtp-note${actionNote.ok ? '' : ' dtp-note--bad'}` }, actionNote.text)
+      ? h('div', { className: `ddp-note${actionNote.ok ? '' : ' ddp-note--bad'}` }, actionNote.text)
       : null,
-    h('div', { className: 'dtp-foot' },
-      h('span', { className: 'dtp-foot-text' }, footParts.join(' · ')),
-      h('button', { type: 'button', className: 'dtp-btn', onClick: () => setAttempt(value => value + 1) }, '刷新')))
+    h('div', { className: 'ddp-foot' },
+      h('span', { className: 'ddp-foot-text' }, footParts.join(' · ')),
+      h('button', { type: 'button', className: 'ddp-btn', onClick: () => setAttempt(value => value + 1) }, '刷新')))
     : null)
 }

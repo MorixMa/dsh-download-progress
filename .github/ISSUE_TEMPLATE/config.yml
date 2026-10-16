@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: 安全问题（请走私密渠道）
-    url: https://github.com/MorixMa/dsh-task-progress/security/advisories/new
+    url: https://github.com/MorixMa/dsh-download-progress/security/advisories/new
     about: 不要开公开 issue。漏洞、凭据泄漏、权限绕过都走这里。
   - name: DSH 本身的问题
     url: https://github.com/deepseek-ai/deepseek-harness

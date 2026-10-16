@@ -21,7 +21,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { CLIENT_FRAGMENTS, HOST_FRAGMENTS, concatFragments } from '../tools/build.mjs'
 
 const PLUGIN_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const PLUGIN_ID = 'dsh-task-progress'
+const PLUGIN_ID = 'dsh-download-progress'
 const PROFILE_DIR = process.env.DSH_PROFILE_DIR ?? 'C:\\Users\\Morix\\.dsh\\profiles\\desktop'
 /** 产物允许比源码旧的时间容差（checkout / merge 会把 mtime 刷成同一时刻）。 */
 const MTIME_TOLERANCE_MS = 2000
@@ -157,7 +157,7 @@ if (existsSync(pluginManifestPath)) {
         && /^[a-z][a-z0-9]*(?:[.-][a-z0-9][a-z0-9-]*)+$/.test(item.name)),
       JSON.stringify((pluginManifest.permissions ?? []).map(item => item.name)))
     check('清单：source.repository 指向本仓库',
-      pluginManifest.source?.repository === 'https://github.com/MorixMa/dsh-task-progress',
+      pluginManifest.source?.repository === 'https://github.com/MorixMa/dsh-download-progress',
       String(pluginManifest.source?.repository))
     check('清单：contributes 的扩展键都带 x- 前缀（0.15 只允许 commands/panels）',
       Object.keys(pluginManifest.contributes ?? {}).every(key => key === 'commands' || key === 'panels' || key.startsWith('x-')),
@@ -186,7 +186,7 @@ check('peerDependencies 里没有任何第三方插件（只锚定宿主）',
 const patchText = existsSync(resolve(PLUGIN_ROOT, 'cordis.patch.yml'))
   ? readFileSync(resolve(PLUGIN_ROOT, 'cordis.patch.yml'), 'utf8')
   : ''
-check('patch 声明了本插件的装载行 id', patchText.includes('id: task-progress'), 'id: task-progress')
+check('patch 声明了本插件的装载行 id', patchText.includes('id: download-progress'), 'id: download-progress')
 check('patch 声明了本插件的包名', patchText.includes(`name: ${PLUGIN_ID}`), `name: ${PLUGIN_ID}`)
 
 // ── 4) host 产物可被 Node 解析、自包含 ─────────────────────────────────────
@@ -227,9 +227,9 @@ if (existsSync(clientEntry)) {
   check('client 产物只声明 slots 服务依赖', /inject\s*=\s*\[\s*['"]slots['"]\s*\]/.test(source))
   check('client 产物注册进 DSH 自己的会话头工具区',
     source.includes('conversation.session.header.utilities'))
-  check('client 产物不含 markdown 原文渲染块', !source.includes('dtp-raw'))
+  check('client 产物不含 markdown 原文渲染块', !source.includes('ddp-raw'))
   check('client 产物带进度动画关键帧',
-    ['dtp-rotate', 'dtp-dash', 'dtp-shimmer', 'dtp-stripes', 'dtp-pop', 'dtp-rise']
+    ['ddp-rotate', 'ddp-dash', 'ddp-shimmer', 'ddp-stripes', 'ddp-pop', 'ddp-rise']
       .every(key => source.includes(key)))
   check('client 产物尊重 prefers-reduced-motion', source.includes('prefers-reduced-motion:reduce'))
 }

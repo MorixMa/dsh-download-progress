@@ -6,8 +6,8 @@
 ## 快速开始
 
 ```powershell
-git clone https://github.com/MorixMa/dsh-task-progress.git
-cd dsh-task-progress
+git clone https://github.com/MorixMa/dsh-download-progress.git
+cd dsh-download-progress
 
 node tools/build.mjs            # 构建 lib/（唯一构建步骤，零依赖）
 node tests/verify-install.mjs   # 完整门禁（会顺带跑下面两个套件）
@@ -84,7 +84,7 @@ CI 会用 `git diff --exit-code -- lib` 抓「改了源码忘了构建」。
 带上下面的信息会快很多：
 
 - DSH 版本（`dsh --version`）与操作系统；
-- `curl http://127.0.0.1:19387/task-progress` 的响应（它会带上 `raw` 字段，
+- `curl http://127.0.0.1:19387/download-progress` 的响应（它会带上 `raw` 字段，
   也就是解析器的输入原文——排查解析问题全靠它）；
 - 你在面板里看到的、以及你期望看到的。
 

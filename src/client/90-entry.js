@@ -1,5 +1,5 @@
 /**
- * dsh-task-progress —— client 半边入口。
+ * dsh-download-progress —— client 半边入口。
  *
  * 只做一件事：把「下载与任务指示器」注册进 **DSH 自己的**会话头右侧工具区
  * （`conversation.session.header.utilities`）。这是宿主核心的 Slot，**不依赖任何
@@ -31,7 +31,7 @@ function apply(ctx) {
 
   ctx.slots.inject(SLOT_NAME, () => ctx.slots.register({
     name: SLOT_NAME,
-    id: 'dsh-task-progress:indicator',
+    id: 'dsh-download-progress:indicator',
     // 该 slot 现有 order：open-in-app -10、session-log-download 0、
     // better-sidebar 的面板开关 10 —— 插在系统项与第三方项之间。
     order: 5,

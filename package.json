@@ -1,7 +1,7 @@
 {
-  "name": "dsh-task-progress",
-  "version": "1.0.0",
-  "description": "DSH 任务进度指示器：会话头里的常驻图标，自动发现运行中的后台 / 下载任务，环形进度 + 动画进度条 + 速率 + 剩余时间。不依赖任何其它插件。",
+  "name": "dsh-download-progress",
+  "version": "1.1.0",
+  "description": "专为 DSH 的下载任务做的进度指示器：会话头里的常驻下载图标，自动发现正在跑的下载与后台任务，环形进度 + 动画进度条 + 速率 + 剩余时间。不依赖任何其它插件。",
   "license": "MIT",
   "author": "MorixMa",
   "type": "module",
@@ -66,11 +66,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MorixMa/dsh-task-progress.git"
+    "url": "git+https://github.com/MorixMa/dsh-download-progress.git"
   },
-  "homepage": "https://github.com/MorixMa/dsh-task-progress#readme",
+  "homepage": "https://github.com/MorixMa/dsh-download-progress#readme",
   "bugs": {
-    "url": "https://github.com/MorixMa/dsh-task-progress/issues"
+    "url": "https://github.com/MorixMa/dsh-download-progress/issues"
   },
   "engines": {
     "node": ">=22.3"

@@ -168,7 +168,7 @@ function readJsonBody(req) {
 function createTaskProgressOpenRoute(ctx) {
   return {
     kind: 'exact',
-    path: '/task-progress/open',
+    path: '/download-progress/open',
     /**
      * @param {any} req - HTTP 请求。
      * @param {any} res - HTTP 响应。

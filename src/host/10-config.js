@@ -80,7 +80,7 @@ function configProblems(value) {
 const Config = {
   '~standard': {
     version: 1,
-    vendor: 'dsh-task-progress',
+    vendor: 'dsh-download-progress',
     /**
      * @param {unknown} value - 装载行的 `config`。
      * @returns {{ value: unknown } | { issues: { message: string }[] }} 校验结果。

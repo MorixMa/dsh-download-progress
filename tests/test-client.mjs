@@ -75,7 +75,7 @@ const source = readFileSync(resolve(PLUGIN_ROOT, 'lib', 'client.js'), 'utf8')
 new Function('window', source)(globalThis.window)
 
 check('client 产物向 window.__ModuleLoader__.load 自注册', loaded !== null)
-check('模块 id 与包名一致', loaded?.id === 'dsh-task-progress', String(loaded?.id))
+check('模块 id 与包名一致', loaded?.id === 'dsh-download-progress', String(loaded?.id))
 
 const REQUIRED = []
 const module = loaded.factory(name => {
@@ -114,18 +114,18 @@ check('apply 后恰好注册了 1 个 slot 条目', registered.length === 1, Str
 const entry = registered[0] ?? {}
 check('挂载点是 DSH 自己的会话头工具区',
   entry.options?.name === 'conversation.session.header.utilities', String(entry.options?.name))
-check('条目 id 为 dsh-task-progress:indicator',
-  entry.options?.id === 'dsh-task-progress:indicator', String(entry.options?.id))
+check('条目 id 为 dsh-download-progress:indicator',
+  entry.options?.id === 'dsh-download-progress:indicator', String(entry.options?.id))
 check('order = 5（排在系统项之后、第三方项之前）', entry.options?.order === 5, String(entry.options?.order))
 check('声明了中文标签', entry.options?.label?.() === '任务进度', String(entry.options?.label?.()))
 check('注册与样式都挂了 disposer', disposers.length === 2, disposers.map(item => item.label).join(' | '))
 check('样式标签已注入且含动画关键帧',
   STYLE_TAGS.length === 1
-  && ['@keyframes dtp-rotate', '@keyframes dtp-dash', '@keyframes dtp-shimmer', '@keyframes dtp-stripes',
-    '@keyframes dtp-pop', '@keyframes dtp-rise'].every(key => STYLE_TAGS[0].textContent.includes(key)),
+  && ['@keyframes ddp-rotate', '@keyframes ddp-dash', '@keyframes ddp-shimmer', '@keyframes ddp-stripes',
+    '@keyframes ddp-pop', '@keyframes ddp-rise'].every(key => STYLE_TAGS[0].textContent.includes(key)),
   String(STYLE_TAGS.length))
 check('样式带 prefers-reduced-motion 关断', STYLE_TAGS[0].textContent.includes('prefers-reduced-motion:reduce'))
-check('样式表里没有 markdown 原文块的类', !STYLE_TAGS[0].textContent.includes('.dtp-raw'))
+check('样式表里没有 markdown 原文块的类', !STYLE_TAGS[0].textContent.includes('.ddp-raw'))
 
 // ── 首渲染 ────────────────────────────────────────────────────────────────
 /**
@@ -180,13 +180,13 @@ try {
 if (tree !== undefined) {
   const classes = collectClasses(tree)
   check('组件首渲染不抛异常', true)
-  check('渲染出图标按钮（dtp-trigger）', classes.includes('dtp-trigger'), classes.join(','))
+  check('渲染出图标按钮（ddp-trigger）', classes.includes('ddp-trigger'), classes.join(','))
   check('按钮带 aria-haspopup / aria-expanded', tree.children[0].props['aria-haspopup'] === 'dialog'
     && tree.children[0].props['aria-expanded'] === 'false')
-  check('渲染出环形进度（dtp-ring）', classes.some(name => name.startsWith('dtp-ring')), classes.join(','))
-  check('渲染出下载图标（dtp-glyph）', classes.includes('dtp-glyph'))
-  check('没有任务时不渲染数量角标', !classes.some(name => name.startsWith('dtp-count')), classes.join(','))
-  check('没有任务时不渲染弹层', !classes.includes('dtp-pop'))
+  check('渲染出环形进度（ddp-ring）', classes.some(name => name.startsWith('ddp-ring')), classes.join(','))
+  check('渲染出下载图标（ddp-glyph）', classes.includes('ddp-glyph'))
+  check('没有任务时不渲染数量角标', !classes.some(name => name.startsWith('ddp-count')), classes.join(','))
+  check('没有任务时不渲染弹层', !classes.includes('ddp-pop'))
 }
 
 // ── 结构化的任务行（不出现 markdown 原文） ────────────────────────────────
@@ -239,7 +239,7 @@ check('任务行**不渲染**源里的 markdown 原文',
 // 单击打开 / 打开所在文件夹
 const nameElement = TaskRow(rowProps).children[0].children[0]
 check('已完成且文件在盘上时，文件名是可点击的按钮',
-  nameElement.type === 'button' && nameElement.props.className.includes('dtp-name--link'), String(nameElement.type))
+  nameElement.type === 'button' && nameElement.props.className.includes('ddp-name--link'), String(nameElement.type))
 nameElement.props.onClick()
 check('点文件名发出的是 open 动作', opened.join(',') === 'open:NotoSansSC-VF.ttf', opened.join(','))
 const headChildren = TaskRow(rowProps).children[0].children
@@ -255,24 +255,24 @@ check('运行中的任务名不可点（避免打开半截文件）',
 
 const noDesktop = TaskRow({ ...rowProps, canOpenWithDesktop: false })
 check('宿主没有原生打开能力时两个入口都不出现',
-  collectClasses(noDesktop).every(name => !name.includes('dtp-name--link') && !name.includes('dtp-icon-btn')),
+  collectClasses(noDesktop).every(name => !name.includes('ddp-name--link') && !name.includes('ddp-icon-btn')),
   collectClasses(noDesktop).join(','))
 const missingFile = TaskRow({ ...rowProps, task: { ...sampleTask, fileExists: false } })
 check('文件不在盘上时不出现任何打开入口',
-  collectClasses(missingFile).every(name => !name.includes('dtp-name--link') && !name.includes('dtp-icon-btn')),
+  collectClasses(missingFile).every(name => !name.includes('ddp-name--link') && !name.includes('ddp-icon-btn')),
   collectClasses(missingFile).join(','))
 
-check('运行中的行带扫光动画类（dtp-fill--live）',
+check('运行中的行带扫光动画类（ddp-fill--live）',
   collectClasses(TaskRow({ ...rowProps, task: { ...sampleTask, status: 'running' } }))
-    .some(name => name.includes('dtp-fill--live')))
+    .some(name => name.includes('ddp-fill--live')))
 check('已完成的行换用成功色', collectClasses(TaskBar({ task: { status: 'completed', metrics: { percent: 100 } } }))
-  .some(name => name.includes('dtp-fill--done')))
-check('未知进度走马灯（dtp-track--unknown）', collectClasses(TaskBar({ task: { status: 'running', metrics: {} } }))
-  .some(name => name.includes('dtp-track--unknown')))
+  .some(name => name.includes('ddp-fill--done')))
+check('未知进度走马灯（ddp-track--unknown）', collectClasses(TaskBar({ task: { status: 'running', metrics: {} } }))
+  .some(name => name.includes('ddp-track--unknown')))
 check('环形进度在未知百分比时走旋转态',
-  collectClasses(ProgressRing({ percent: null, spin: true })).some(name => name.includes('dtp-ring--spin')))
+  collectClasses(ProgressRing({ percent: null, spin: true })).some(name => name.includes('ddp-ring--spin')))
 check('环形进度在已知百分比时不旋转',
-  !collectClasses(ProgressRing({ percent: 42, spin: false })).some(name => name.includes('dtp-ring--spin')))
+  !collectClasses(ProgressRing({ percent: 42, spin: false })).some(name => name.includes('ddp-ring--spin')))
 
 // ── 聚合 ──────────────────────────────────────────────────────────────────
 const sampled = createSampler()([{
@@ -304,39 +304,39 @@ globalThis.document.baseURI = 'dsh-app://app/'
 globalThis.__DSH_TRANSPORT__ = { ownsHost: true, streamBaseUrl: 'http://127.0.0.1:19387' }
 const shellUrl = taskProgressRouteUrl('session-1')
 check('路由：桌面壳里走页面基底 dsh-app://app（同源转发给宿主），不用传输基底',
-  shellUrl === 'dsh-app://app/task-progress?sessionId=session-1', shellUrl)
+  shellUrl === 'dsh-app://app/download-progress?sessionId=session-1', shellUrl)
 check('路由：回归守卫——绝不把请求打到跨源的传输 origin 上',
   !shellUrl.startsWith('http://127.0.0.1:19387'), shellUrl)
 
 globalThis.document.baseURI = 'https://host/dataops/proxy/3080/'
 check('路由：反代子路径前缀被保留（相对路径，无前导斜杠）',
-  taskProgressRouteUrl() === 'https://host/dataops/proxy/3080/task-progress', taskProgressRouteUrl())
+  taskProgressRouteUrl() === 'https://host/dataops/proxy/3080/download-progress', taskProgressRouteUrl())
 
 globalThis.document.baseURI = 'https://host/dataops/proxy/3080'
 check('路由：基底没有结尾斜杠时不会吃掉前缀最后一段',
-  taskProgressRouteUrl() === 'https://host/dataops/proxy/3080/task-progress', taskProgressRouteUrl())
+  taskProgressRouteUrl() === 'https://host/dataops/proxy/3080/download-progress', taskProgressRouteUrl())
 
 globalThis.document.baseURI = 'dsh-app://app/index.html'
 check('路由：基底指向文件时替换掉文件名，而不是拼在它后面',
-  taskProgressRouteUrl() === 'dsh-app://app/task-progress', taskProgressRouteUrl())
+  taskProgressRouteUrl() === 'dsh-app://app/download-progress', taskProgressRouteUrl())
 
 globalThis.document.baseURI = 'http://127.0.0.1:19387/?token=abc#x'
 check('路由：基底的 query / hash 被丢掉（启动令牌不进 URL）',
-  taskProgressRouteUrl() === 'http://127.0.0.1:19387/task-progress', taskProgressRouteUrl())
+  taskProgressRouteUrl() === 'http://127.0.0.1:19387/download-progress', taskProgressRouteUrl())
 
 globalThis.document.baseURI = 'http://127.0.0.1:19387/'
 check('路由：普通浏览器页面基底就是宿主 origin',
-  taskProgressRouteUrl() === 'http://127.0.0.1:19387/task-progress', taskProgressRouteUrl())
+  taskProgressRouteUrl() === 'http://127.0.0.1:19387/download-progress', taskProgressRouteUrl())
 
 // 非 DOM（SSR / 单测）才退回传输基底；这一支在真实浏览器里走不到。
 delete globalThis.document
 globalThis.__DSH_TRANSPORT__ = { ownsHost: true, streamBaseUrl: 'http://127.0.0.1:19387/' }
 check('路由：没有 document 时退回传输基底',
-  taskProgressRouteUrl() === 'http://127.0.0.1:19387/task-progress', taskProgressRouteUrl())
+  taskProgressRouteUrl() === 'http://127.0.0.1:19387/download-progress', taskProgressRouteUrl())
 delete globalThis.__DSH_TRANSPORT__
 const bareUrl = taskProgressRouteUrl()
 check('路由：两者都没有时给出一个合法的占位绝对 URL（这个环境不会真的发请求）',
-  bareUrl.endsWith('/task-progress'), bareUrl)
+  bareUrl.endsWith('/download-progress'), bareUrl)
 globalThis.document = { ...globalThis.document, baseURI: ORIGINAL_BASE }
 
 if (failures.length > 0) {

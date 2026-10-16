@@ -5,7 +5,7 @@
  *
  * - **HTTP 走页面基底 `document.baseURI`。** 桌面壳把 GUI 从 `dsh-app://app/` 送出，
  *   而壳的 `protocol.handle` 会把 `dsh-app://app/<非静态路径>` **同源转发**给宿主——
- *   所以 `dsh-app://app/task-progress` 会真的打到宿主的 `/task-progress` 上。
+ *   所以 `dsh-app://app/download-progress` 会真的打到宿主的 `/download-progress` 上。
  * - **不能走壳注入的 `__DSH_TRANSPORT__.streamBaseUrl`。** 它是宿主的**真实 origin**
  *   （`http://127.0.0.1:<port>`），与页面 `dsh-app://app` **不同源**；而宿主上插件注册
  *   的路由不返回任何 `Access-Control-Allow-*` 头，浏览器会在 CORS 检查上直接拒掉，
@@ -50,8 +50,8 @@ function taskProgressBase() {
  * 把基底归一化成"目录基底"：去掉 query（启动令牌挂在上面）与 hash，再补结尾斜杠。
  *
  * 为什么必须补：`https://host/dataops/proxy/3080` 这种**没有结尾斜杠**的目录 URL，
- * 用 `new URL('task-progress', base)` 会按"替换最后一段"处理，得到
- * `/dataops/proxy/task-progress`——前缀里的 `3080` 就没了。better-sidebar 的
+ * 用 `new URL('download-progress', base)` 会按"替换最后一段"处理，得到
+ * `/dataops/proxy/download-progress`——前缀里的 `3080` 就没了。better-sidebar 的
  * `directoryBase()` 就是这么处理的。
  *
  * 唯一的例外：基底看起来指向**文件**（最后一段带 `.`，如 `dsh-app://app/index.html`），
@@ -91,19 +91,19 @@ function taskProgressUrl(route, sessionId) {
 }
 
 /**
- * 状态路由 `GET /task-progress` 的绝对 URL。
+ * 状态路由 `GET /download-progress` 的绝对 URL。
  * @param {string|undefined} sessionId - 当前会话，用来把访问围栏设到该会话。
  * @returns {string} 绝对 URL。
  */
 function taskProgressRouteUrl(sessionId) {
-  return taskProgressUrl('task-progress', sessionId)
+  return taskProgressUrl('download-progress', sessionId)
 }
 
 /**
- * 打开路由 `POST /task-progress/open` 的绝对 URL。
+ * 打开路由 `POST /download-progress/open` 的绝对 URL。
  * @returns {string} 绝对 URL。
  */
 function taskProgressOpenUrl() {
-  return taskProgressUrl('task-progress/open', undefined)
+  return taskProgressUrl('download-progress/open', undefined)
 }
 

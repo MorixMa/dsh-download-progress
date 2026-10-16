@@ -1,33 +1,47 @@
-# dsh-task-progress
+# dsh-download-progress
 
-**DSH 任务进度指示器** —— 会话头里一个常驻的下载图标（Chrome 下载按钮那种），自动发现
-正在跑的后台任务与下载任务，用环形进度、动画进度条、速率和预计剩余时间实时呈现。
+**专为 DSH 的下载任务做的进度指示器** —— 会话头里一个常驻的下载图标（Chrome 下载按钮那种），
+自动发现正在跑的下载任务与后台任务，用环形进度、动画进度条、速率和预计剩余时间实时呈现。
 
-> **English**: A download-style task-progress indicator for
+> **English**: A download-progress indicator for
 > [DSH (DeepSeek Harness)](https://github.com/deepseek-ai/deepseek-harness): a persistent
-> icon in the session header that discovers running background jobs and downloads on its own,
-> and renders them as a progress ring, animated bars, transfer speed and ETA.
+> icon in the session header that finds your running downloads on its own, and renders them as
+> a progress ring, animated bars, transfer speed and ETA.
 > Full English documentation: **[README.en.md](./README.en.md)**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-334EAC.svg)](./LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-%3E%3D0.2.0--rc.1%20%3C0.2.1-081F5C.svg)](https://github.com/deepseek-ai/deepseek-harness)
 [![Node](https://img.shields.io/badge/Node-%E2%89%A522.3-7096D1.svg)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-2ea043.svg)](#八开发)
-[![CI](https://github.com/MorixMa/dsh-task-progress/actions/workflows/ci.yml/badge.svg)](https://github.com/MorixMa/dsh-task-progress/actions/workflows/ci.yml)
+[![CI](https://github.com/MorixMa/dsh-download-progress/actions/workflows/ci.yml/badge.svg)](https://github.com/MorixMa/dsh-download-progress/actions/workflows/ci.yml)
 
 ---
 
-## 它解决什么
+## 这个插件是干什么的
 
-后台任务跑起来之后，你只能盯着终端或者反复问模型「下完了没」。这个插件把那个问题变成
-**一眼可见**：会话头右上角一个图标，有任务在跑时外圈亮起环形进度弧、右下角出现数量角标；
-点开是一份任务清单，每条一行动画进度条。下载完了，点一下文件名就能打开。
+**它盯的是「下载」这一件事。**
+
+在 DSH 里，下载几乎总是以**后台任务**的形式发生的：`curl` / `wget` / `aria2c` 下载模型权重、
+安装包、数据集、字体包，或者包管理器在拉依赖。它们的进度只打在**任务输出**里，于是你要么盯着
+终端，要么反复问模型「下完了没」，要么干脆忘了它还在跑。
+
+这个插件把这件事变成**一眼可见**：会话头右上角一个图标，有下载在跑时外圈亮起环形进度弧、
+右下角出现数量角标；点开是一份清单，每条一行动画进度条，带百分比、已传输 / 总量、速率与剩余
+时间。下完之后，点一下文件名就能打开它。
 
 它**不启动任务、不杀任务、不写文件**——是一个纯粹的观察者（唯一的例外是「打开文件 /
 打开文件夹」，那需要你明确点击，而且只对面板上正在显示的那几个文件生效）。
 
+> **为什么它同时也会列出别的后台任务？** 因为在 DSH 里下载和普通后台任务走的是**同一本名册**
+> （`ctx.jobs`）——插件没法、也不该去猜哪条才是下载。所以它把名册里的任务都读出来，能解析出
+> 进度的就画成进度条，解析不出的就显示成「未知进度」的走马灯条。对下载任务来说，这正是你要的
+> 效果；对别的后台任务来说，它顺带也是个进度看板。
+
 ## 特性
 
+- **为下载任务的输出而写**：解析器认的是真实下载器**实际打印**的东西——
+  curl `--progress-bar` 的 `\r` 刷新进度表、wget 的 `45%[===>  ] 7.98M 1.21MB/s eta 8s`、
+  aria2 的汇总行、各类 `已传输 x / y` 写法，以及通用的 JSON 进度文件。
 - **零第三方插件依赖**：客户端的 Slot 注册表与宿主的 webServer 都是 DSH 核心能力。
   `dsh-better-sidebar` 之类的插件装没装都不影响它。
 - **零运行时依赖**：`package.json` 里 `dependencies` 是空的，包内不含 `node_modules`。
@@ -36,8 +50,6 @@
 - **只显示文件名**：界面里没有目录、没有盘符、没有整行命令行。
 - **真实数据、绝不编造**：源里没写速率就不显示速率；用两帧差分算出真实速率与剩余时间，
   任务卡住时停止外推而不是一直显示一个旧值。
-- **能读真实下载器的输出**：curl `--progress-bar`（`\r` 刷新的进度表）、
-  wget（`45%[===>  ] 7.98M 1.21MB/s eta 8s`）、aria2、各类 `已传输 x / y` 写法。
 
 ---
 
@@ -46,7 +58,7 @@
 ### 从 GitHub 安装
 
 ```powershell
-dsh plugin --profile <profile 名> add github:MorixMa/dsh-task-progress
+dsh plugin --profile <profile 名> add github:MorixMa/dsh-download-progress
 ```
 
 产物（`lib/`）随仓库提交，所以安装端**不需要**跑构建，也不需要联网装依赖。
@@ -169,8 +181,8 @@ POSIX 分支的 `(?<![\w:/])` 让 URL 里切不出 `/host/a/b.gz` 来。
 | `pollIntervalMs` | `number` | `1500` | 客户端拉取间隔，钳制在 500–60000 |
 
 ```yaml
-- id: task-progress
-  name: dsh-task-progress
+- id: download-progress
+  name: dsh-download-progress
   config:
     progressSources:
       - 'D:\字体_进度.md'
@@ -184,7 +196,7 @@ POSIX 分支的 `(?<![\w:/])` 让 URL 里切不出 `/host/a/b.gz` 来。
 ### 关于「设置页里的表单」
 
 `ctx.settings.register(ns, schema)` 在 **DSH 0.1.7 起已经整体删除**。替代品是宿主
-`SettingsForms`：**命名空间 = 插件 Loader 行的 entry id（这里是 `task-progress`），
+`SettingsForms`：**命名空间 = 插件 Loader 行的 entry id（这里是 `download-progress`），
 表单 schema = 插件模块导出的 `Config`**。本插件照这条规则导出了 `Config`，Loader 的
 装载期校验认它。
 
@@ -202,11 +214,11 @@ POSIX 分支的 `(?<![\w:/])` 让 URL 里切不出 `/host/a/b.gz` 来。
 
 | 现象 | 原因 / 处理 |
 |---|---|
-| 会话头里没有下载图标 | 客户端半边没加载。确认 `dsh.profile.bundles` 里有 `dsh-task-progress`，然后**硬刷新**（Ctrl+Shift+R）；还不行就重启 DSH |
+| 会话头里没有下载图标 | 客户端半边没加载。确认 `dsh.profile.bundles` 里有 `dsh-download-progress`，然后**硬刷新**（Ctrl+Shift+R）；还不行就重启 DSH |
 | 图标在，点开报「读取任务进度失败：Failed to fetch」 | host 半边的路由没挂上，**重启 DSH**。host 半边改动一律要重启才生效 |
 | 报「路由返回 HTTP 403」 | 信任围栏拦下了。桌面版正常不会出现（`dsh-app://app` 已放行）；出现说明请求来自别的源，或 GUI 被反代到了非回环地址——后者需要把该权威加进部署的 `trustedHosts` |
 | 一直「现在没有运行中的任务」 | 弹层空态里会列出每个来源为什么是空的 |
-| 进度条一直是走马灯（未知进度） | 该任务的输出里没有可识别进度。`curl "http://127.0.0.1:19387/task-progress"` 看那条任务的 `raw` 字段 |
+| 进度条一直是走马灯（未知进度） | 该任务的输出里没有可识别进度。`curl "http://127.0.0.1:19387/download-progress"` 看那条任务的 `raw` 字段 |
 | 速率一直是空 | 源没写速率，而且两次拉取之间字节数没变（差分没有基线）。需要 2 个采样点 |
 | 进度条停在某个数字不动 | 正常——进度来自源；源不更新就不会动。看弹层底部的「刷新于」确认轮询还活着 |
 | 解析出来的数字不对 | 对照上面「支持的进度写法」；要么改源，要么提 issue 带上那几行原文 |
@@ -247,8 +259,8 @@ POSIX 分支的 `(?<![\w:/])` 让 URL 里切不出 `/host/a/b.gz` 来。
 
 | 路由 | 副作用 | 授权 |
 |---|---|---|
-| `GET /task-progress` | **无**（不改文件、不杀任务、不推游标） | 浏览器信任围栏 |
-| `POST /task-progress/open` | 会让宿主用系统默认应用打开一个文件 / 在资源管理器里定位它 | 信任围栏 **+ 白名单** |
+| `GET /download-progress` | **无**（不改文件、不杀任务、不推游标） | 浏览器信任围栏 |
+| `POST /download-progress/open` | 会让宿主用系统默认应用打开一个文件 / 在资源管理器里定位它 | 信任围栏 **+ 白名单** |
 
 围栏规则（与 DSH `/api` 网关同款）：`Host` 必须是回环或部署声明的 `trustedHosts`；
 `Sec-Fetch-Site: cross-site` 一律拒绝；带 `Origin` 时必须是桌面壳的 `dsh-app://app`
@@ -257,7 +269,7 @@ POSIX 分支的 `(?<![\w:/])` 让 URL 里切不出 `/host/a/b.gz` 来。
 ### 打开路由的白名单
 
 **只认本插件自己刚报告过的文件。** 采集任务时把每个已知产物的绝对路径写进一份
-**10 分钟 TTL、最多 128 条**的白名单；`POST /task-progress/open` 收到的 `path` 不在
+**10 分钟 TTL、最多 128 条**的白名单；`POST /download-progress/open` 收到的 `path` 不在
 白名单里一律 **403**，连 `stat` 都不做。
 
 这条设计的意义：即使有人能发同源请求，也不能把这条路由当成「启动任意路径」的后门——
@@ -273,7 +285,7 @@ POSIX 分支的 `(?<![\w:/])` 让 URL 里切不出 `/host/a/b.gz` 来。
 ### 关于围栏的边界
 
 **围栏是这两条路由唯一的门。** 实测 DSH 的 web token 只作用于它自己的 `/api*`
-（`GET /api/modules` 无 token → 401，插件注册的 `GET /task-progress` → 200），所以任何
+（`GET /api/modules` 无 token → 401，插件注册的 `GET /download-progress` → 200），所以任何
 **本机**进程都能读到任务列表。这是平台约定；不想要就别装。
 
 ---
@@ -295,7 +307,7 @@ src/host/    00-runtime.js  →  内建模块垫片 + JSON 应答 + 信任围栏
              20-parse.js    →  进度解析（进度块 / 通用 JSON）
              30-sources.js  →  进度源文件扫描
              40-tasks.js    →  三路数据合成任务列表
-             50-route.js    →  GET /task-progress
+             50-route.js    →  GET /download-progress
              90-entry.js    →  apply / inject
 src/client/  00-format.js   →  数字格式化（中文）
              05-route.js    →  宿主路由 URL 解析（壳传输基底 / baseURI）
