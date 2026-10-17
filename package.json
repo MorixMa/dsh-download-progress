@@ -1,6 +1,6 @@
 {
   "name": "dsh-download-progress",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "专为 DSH 的下载任务做的进度指示器：会话头里的常驻下载图标，自动发现正在跑的下载与后台任务，环形进度 + 动画进度条 + 速率 + 剩余时间。不依赖任何其它插件。",
   "license": "MIT",
   "author": "MorixMa",

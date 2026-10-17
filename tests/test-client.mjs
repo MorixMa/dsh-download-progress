@@ -202,6 +202,75 @@ return { aggregateTasks, createSampler, TaskRow, ProgressRing, TaskBar }`)
   return build(REACT_STUB)
 })()
 
+// ── 弹层定位：任何视口下都不许越出边界（回归 1.1.1 的溢出 bug） ──────────────
+const { computeAnchor, POP_WIDTH, POP_MAX_HEIGHT_VH, POP_MAX_HEIGHT_PX } = (() => {
+  const read = name => readFileSync(resolve(PLUGIN_ROOT, 'src', 'client', name), 'utf8')
+  const build = new Function(`const React = arguments[0]; const h = React.createElement;
+${read('00-format.js')}
+${read('05-route.js')}
+${read('10-sampler.js')}
+${read('20-styles.js')}
+${read('30-view.js')}
+return { computeAnchor, POP_WIDTH, POP_MAX_HEIGHT_VH, POP_MAX_HEIGHT_PX }`)
+  return build(REACT_STUB)
+})()
+
+/**
+ * 把定位结果换算成实际边界，断言面板完全落在视口内。
+ * @param {{top:number,right:number}} anchor - 定位值。
+ * @param {number} viewportWidth - 视口宽。
+ * @returns {{leftEdge:number,rightEdge:number,width:number}} 边界。
+ */
+const edgesOf = (anchor, viewportWidth) => {
+  const width = Math.max(0, Math.min(POP_WIDTH, viewportWidth - 20))
+  const rightEdge = viewportWidth - anchor.right
+  return { leftEdge: rightEdge - width, rightEdge, width }
+}
+
+{
+  // 常规：触发器在中间
+  const a = computeAnchor({ top: 20, bottom: 48, right: 900 }, 1200, 900)
+  const e = edgesOf(a, 1200)
+  check('弹层定位：常规视口下右对齐触发器（right = 视口宽 − 触发器右边界）',
+    a.right === 300, String(a.right))
+  check('弹层定位：常规视口下面板完整留在视口内',
+    e.leftEdge >= 0 && e.rightEdge <= 1200, `${e.leftEdge}..${e.rightEdge}`)
+}
+{
+  // 复现现场：1707 宽视口、触发器贴到最右边（rect.right ≈ 视口宽）
+  const a = computeAnchor({ top: 90, bottom: 118, right: 1700 }, 1707, 1067)
+  const e = edgesOf(a, 1707)
+  check('弹层定位：触发器贴右边时面板仍在视口内（回归：1707 屏 / 1721 窗那次溢出）',
+    e.leftEdge >= 0 && e.rightEdge <= 1707, `${e.leftEdge}..${e.rightEdge}`)
+  check('弹层定位：此时右侧安全间距恰好是 8px', a.right === 8, String(a.right))
+}
+{
+  // 极窄视口：宽度必须退让，两侧各留 8px
+  const a = computeAnchor({ top: 10, bottom: 38, right: 300 }, 320, 600)
+  const e = edgesOf(a, 320)
+  check('弹层定位：极窄视口下面板宽度退让且两侧留白',
+    e.leftEdge >= 0 && e.rightEdge <= 320 && e.width === 300, `width=${e.width} ${e.leftEdge}..${e.rightEdge}`)
+}
+{
+  // 窗口很矮：纵向不许被顶出底边
+  const maxH = Math.min(400 * POP_MAX_HEIGHT_VH, POP_MAX_HEIGHT_PX)
+  const a = computeAnchor({ top: 300, bottom: 328, right: 800 }, 1000, 400, POP_WIDTH, maxH)
+  check('弹层定位：窗口很矮时纵向被钳住，不越出底边',
+    a.top + maxH <= 400 + 1e-9, `top=${a.top} maxH=${maxH}`)
+}
+{
+  // 联动保护：JS 常量与 CSS 必须一致，否则钳制会静默失效
+  const css = readFileSync(resolve(PLUGIN_ROOT, 'src', 'client', '20-styles.js'), 'utf8')
+  check('定位常量与 CSS 一致：弹层宽度 388px',
+    POP_WIDTH === 388 && css.includes('width:388px'), `POP_WIDTH=${POP_WIDTH}`)
+  check('定位常量与 CSS 一致：max-width 的 100vw − 20px',
+    css.includes('calc(100vw - 20px)'), '20px 内缩')
+  check('定位常量与 CSS 一致：max-height 的 min(64vh, 540px)',
+    Math.abs(POP_MAX_HEIGHT_VH - 0.64) < 1e-9 && POP_MAX_HEIGHT_PX === 540
+    && css.includes('64vh') && css.includes('540px'),
+    `${POP_MAX_HEIGHT_VH}/${POP_MAX_HEIGHT_PX}`)
+}
+
 const sampleTask = {
   id: 'job:pwsh-2',
   // 旧字段：整行命令行。面板**不该**再显示它。
